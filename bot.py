@@ -209,7 +209,7 @@ async def regen(ctx):
 async def on_message(message):
     print(prefix)
     msg = message.content
-    if (PERIOD_IGNORE and msg.startswith(".")) or msg.startswith(prefix):
+    if (PERIOD_IGNORE and msg.startswith(".")) or msg.startswith(prefix) and not message.pinned:
         await bot.process_commands(message)
         return
     else:
