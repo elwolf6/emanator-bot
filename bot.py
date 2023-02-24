@@ -207,7 +207,7 @@ async def regen(ctx):
 
 @bot.event
 async def on_message(message):
-    if(message.type != 0):
+    if(message.type != discord.MessageType.default):
         return
 
     msg = message.content
