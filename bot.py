@@ -194,6 +194,10 @@ async def regen(ctx):
 async def on_message(message):
     if(message.type != discord.MessageType.default):
         return
+    if message.author.bot:
+        return
+    if len(message.attachments) != 0:
+        return
 
     msg = message.content
     if (PERIOD_IGNORE and msg.startswith(".")) or msg.startswith(prefix):
