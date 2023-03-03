@@ -13,25 +13,17 @@ from discord.ext import commands
 # get .env variables
 load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-ENDPOINT = os.getenv("ENDPOINT")
+OAI_KEY = os.getenv("OPENAI_KEY")
 PERIOD_IGNORE = os.getenv("PERIOD_IGNORE")
 
 # Generation parameters
 # Reference: https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig
 params = {
-    'max_new_tokens': 200,
-    'do_sample': True,
-    'temperature': 0.5,
-    'top_p': 1,
-    'typical_p': 1,
-    'repetition_penalty': 1.1,
-    'top_k': 3,
-    'min_length': 0,
-    'no_repeat_ngram_size': 0,
-    'num_beams': 1,
-    'penalty_alpha': 0.6,
-    'length_penalty': 1,
-    'early_stopping': False,
+    'model': 'text-davinci-003',
+    'temperature': 0.9,
+    'max_tokens': 200,
+    'presence_penalty': 0.7,
+    'frequency_penalty': 0.7 
 }
 
 def split_text(text):
@@ -65,32 +57,25 @@ def upload_tavern_character(img, name1, name2):
     return upload_character(json.dumps(_json), img, tavern=True)
 
 def get_reply(prompt):
-    response = requests.post(f"https://{ENDPOINT}/run/textgen", json={
-        "data": [
-            prompt,
-            params['max_new_tokens'],
-            params['do_sample'],
-            params['max_new_tokens'],
-            params['temperature'],
-            params['top_p'],
-            params['typical_p'],
-            params['repetition_penalty'],
-            params['top_k'],
-            params['min_length'],
-            params['no_repeat_ngram_size'],
-            params['num_beams'],
-            params['penalty_alpha'],
-            params['length_penalty'],
-            params['early_stopping'],
-        ]
-    })
+    args ={
+        "prompt": prompt,
+        "model": params['model'],
+        "temperature": params['temperature'],
+        "max_tokens": params['max_tokens'],
+        "presence_penalty": params['presence_penalty'],
+        "frequency_penalty": params['frequency_penalty']
+    }
+    response = requests.post("https://api.openai.com/v1/completions", headers={"Content-Type": "application/json",  "Authorization": f"Bearer {OAI_KEY}"},json=args)
 
-    if response.status_code == 200:
-        reply = response.json()["data"][0]
+    try:
+
+        reply = response.json()["choices"][0]["text"]
         print(f"\n\n{reply}\n--------------------\n")
-        return reply.replace(prompt, '', 1)
-    else:
-        return f"Error {response.status_code}"
+        return reply
+    except Exception as e:
+        reply = response.json()["data"]
+        print(f"LOL {reply}")
+        print(f"Error\n{e}\nResponse code: {response.status_code}")
 
 characters_folder = 'Characters'
 cards_folder = 'Cards'
