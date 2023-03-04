@@ -73,8 +73,6 @@ def get_reply(prompt):
         print(f"\n\n{reply}\n--------------------\n")
         return reply
     except Exception as e:
-        reply = response.json()["data"]
-        print(f"LOL {reply}")
         print(f"Error\n{e}\nResponse code: {response.status_code}")
 
 characters_folder = 'Characters'
